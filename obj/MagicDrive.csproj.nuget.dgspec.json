@@ -1,28 +1,27 @@
 {
   "format": 1,
   "restore": {
-    "/Users/sebastien/_Git/RasberryPi/MagicDrive/MagicDrive.csproj": {}
+    "C:\\_git\\Raspberry\\MagicDrive\\MagicDrive.csproj": {}
   },
   "projects": {
-    "/Users/sebastien/_Git/RasberryPi/MagicDrive/MagicDrive.csproj": {
+    "C:\\_git\\Raspberry\\MagicDrive\\MagicDrive.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/sebastien/_Git/RasberryPi/MagicDrive/MagicDrive.csproj",
+        "projectUniqueName": "C:\\_git\\Raspberry\\MagicDrive\\MagicDrive.csproj",
         "projectName": "MagicDrive",
-        "projectPath": "/Users/sebastien/_Git/RasberryPi/MagicDrive/MagicDrive.csproj",
-        "packagesPath": "/Users/sebastien/.nuget/packages/",
-        "outputPath": "/Users/sebastien/_Git/RasberryPi/MagicDrive/obj/",
+        "projectPath": "C:\\_git\\Raspberry\\MagicDrive\\MagicDrive.csproj",
+        "packagesPath": "C:\\Users\\sdubos\\.nuget\\packages\\",
+        "outputPath": "C:\\_git\\Raspberry\\MagicDrive\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "/Users/sebastien/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\sdubos\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -78,7 +77,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.201/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
         }
       }
     }
