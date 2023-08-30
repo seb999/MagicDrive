@@ -10,12 +10,11 @@ public class SwitchController
     {
         _pinNumber = pin;
         _controller = new GpioController();
-        _controller.OpenPin(pin, PinMode.Input);
-        _controller.Write(_pinNumber, PinValue.High);
-
+        _controller.OpenPin(pin, PinMode.InputPullUp);
+       
         _controller.RegisterCallbackForPinValueChangedEvent(
                 pin,
-                PinEventTypes.Falling | PinEventTypes.Rising, // Detect both rising and falling edge events
+                PinEventTypes.Falling, // Detect both rising and falling edge events
                 onPinValueChanged);
     }
 

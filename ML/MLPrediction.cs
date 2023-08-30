@@ -1,6 +1,6 @@
 using System;
 
-namespace MagicDrive.MLClass
+namespace MagicDrive.ML
 {
     public class MLPrediction
     {

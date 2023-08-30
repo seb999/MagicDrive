@@ -1,32 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "C:\\_git\\Raspberry\\MagicDrive\\MagicDrive.csproj": {}
+    "/home/sebastien/Git/MagicDrive/MagicDrive.csproj": {}
   },
   "projects": {
-    "C:\\_git\\Raspberry\\MagicDrive\\MagicDrive.csproj": {
+    "/home/sebastien/Git/MagicDrive/MagicDrive.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\_git\\Raspberry\\MagicDrive\\MagicDrive.csproj",
+        "projectUniqueName": "/home/sebastien/Git/MagicDrive/MagicDrive.csproj",
         "projectName": "MagicDrive",
-        "projectPath": "C:\\_git\\Raspberry\\MagicDrive\\MagicDrive.csproj",
-        "packagesPath": "C:\\Users\\sdubos\\.nuget\\packages\\",
-        "outputPath": "C:\\_git\\Raspberry\\MagicDrive\\obj\\",
+        "projectPath": "/home/sebastien/Git/MagicDrive/MagicDrive.csproj",
+        "packagesPath": "/home/sebastien/.nuget/packages/",
+        "outputPath": "/home/sebastien/Git/MagicDrive/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\sdubos\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/sebastien/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
-          "net7.0"
+          "net6.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net7.0": {
-            "targetAlias": "net7.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {}
           }
         },
@@ -37,17 +35,9 @@
         }
       },
       "frameworks": {
-        "net7.0": {
-          "targetAlias": "net7.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "dependencies": {
-            "Iot.Device.Bindings": {
-              "target": "Package",
-              "version": "[3.0.0, )"
-            },
-            "MMALSharp": {
-              "target": "Package",
-              "version": "[0.6.0, )"
-            },
             "Microsoft.ML": {
               "target": "Package",
               "version": "[2.0.1, )"
@@ -58,7 +48,7 @@
             },
             "System.Device.Gpio": {
               "target": "Package",
-              "version": "[3.0.0, )"
+              "version": "[2.2.0-*, )"
             }
           },
           "imports": [
@@ -77,7 +67,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/home/sebastien/.dotnet/sdk/6.0.413/RuntimeIdentifierGraph.json"
         }
       }
     }

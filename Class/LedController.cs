@@ -2,40 +2,38 @@ using System.Device.Gpio;
 
 public class LedController
 {
-    private readonly GpioController _controller;
-    private readonly int _pinNumber;
+    private GpioController _controller{get;set;}
+    private readonly int pin;
 
-    public LedController(int pin)
+    public LedController(int pinNumber)
     {
-        _pinNumber = pin;
+        this.pin = pinNumber;
         _controller = new GpioController();
         _controller.OpenPin(pin, PinMode.Output);
-        _controller.Write(_pinNumber, PinValue.Low);
+        _controller.Write(this.pin, PinValue.Low);
     }
 
     public void Blink()
     {
-        _controller.Write(_pinNumber, PinValue.High);
-        Thread.Sleep(300);
-        _controller.Write(_pinNumber, PinValue.Low);
-        Thread.Sleep(300);
-
-        Dispose();
+        _controller.Write(pin, PinValue.High);
+        Thread.Sleep(50);
+        _controller.Write(pin, PinValue.Low);
+        Thread.Sleep(1500);
     }
 
     public void On()
     {
-        _controller.Write(_pinNumber, PinValue.High);
+        _controller.Write(pin, PinValue.High);
     }
 
     public void Off()
     {
-        _controller.Write(_pinNumber, PinValue.Low);
+        _controller.Write(pin, PinValue.Low);
     }
 
     private void Dispose()
     {
-        _controller.ClosePin(_pinNumber);
+        _controller.ClosePin(pin);
         _controller.Dispose();
     }
 }

@@ -7,6 +7,8 @@ namespace MagicDrive.Misc
         {
             watcher = new FileSystemWatcher();
             watcher.Path = pictureFolder;
+            watcher.IncludeSubdirectories = false;
+            watcher.EnableRaisingEvents = true;
             watcher.Created += OnFileCreated;
         }
 

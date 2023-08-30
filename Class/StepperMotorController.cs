@@ -15,6 +15,7 @@ public class StepperMotorController
     public StepperMotorController()
     {
         // Set up the GPIO pins
+        controller = new GpioController();
         controller.OpenPin(DIR, PinMode.Output);
         controller.OpenPin(STEP, PinMode.Output);
         //controller.OpenPin(ENABLE, PinMode.Output);   //first try without that one

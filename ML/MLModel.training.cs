@@ -2,9 +2,9 @@
 using System.Linq;
 using Microsoft.ML;
 
-namespace MagicDrive.MLClass
+namespace MagicDrive.ML
 {
-    public partial class MCModel
+    public partial class MLModel
     {
         /// <summary>
         /// Retrains model using the pipeline generated as part of the training process. For more information on how to load data, see aka.ms/loaddata.
