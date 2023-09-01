@@ -14,7 +14,7 @@ public class SwitchController
        
         _controller.RegisterCallbackForPinValueChangedEvent(
                 pin,
-                PinEventTypes.Falling, // Detect both rising and falling edge events
+                PinEventTypes.Falling | PinEventTypes.Rising, // Detect both rising and falling edge events
                 onPinValueChanged);
     }
 

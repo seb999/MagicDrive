@@ -171,11 +171,65 @@
           }
         }
       },
-      "Microsoft.ML.TensorFlow/2.0.1": {
+      "Microsoft.ML.OnnxConverter/0.20.1": {
+        "type": "package",
+        "dependencies": {
+          "Google.Protobuf": "3.19.6",
+          "Microsoft.ML": "2.0.1"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.ML.OnnxConverter.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.ML.OnnxConverter.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Microsoft.ML.OnnxRuntime.Managed/1.10.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Memory": "4.5.3"
+        },
+        "compile": {
+          "lib/net5.0/Microsoft.ML.OnnxRuntime.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net5.0/Microsoft.ML.OnnxRuntime.dll": {
+            "related": ".pdb"
+          }
+        },
+        "build": {
+          "build/netstandard2.0/Microsoft.ML.OnnxRuntime.Managed.targets": {}
+        }
+      },
+      "Microsoft.ML.OnnxTransformer/2.0.1": {
         "type": "package",
         "dependencies": {
           "Google.Protobuf": "3.19.6",
           "Microsoft.ML": "2.0.1",
+          "Microsoft.ML.OnnxRuntime.Managed": "1.10.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.ML.OnnxTransformer.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.ML.OnnxTransformer.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Microsoft.ML.TensorFlow/1.7.1": {
+        "type": "package",
+        "dependencies": {
+          "Google.Protobuf": "3.19.4",
+          "Microsoft.ML": "1.7.1",
           "System.IO.FileSystem.AccessControl": "4.5.0",
           "System.Security.Principal.Windows": "4.5.0",
           "TensorFlow.NET": "0.20.1"
@@ -191,10 +245,10 @@
           }
         }
       },
-      "Microsoft.ML.Vision/2.0.1": {
+      "Microsoft.ML.Vision/1.7.1": {
         "type": "package",
         "dependencies": {
-          "Microsoft.ML.TensorFlow": "2.0.1"
+          "Microsoft.ML.TensorFlow": "1.7.1"
         },
         "compile": {
           "lib/netstandard2.0/Microsoft.ML.Vision.dll": {
@@ -636,10 +690,70 @@
         "mlnetlogo.png"
       ]
     },
-    "Microsoft.ML.TensorFlow/2.0.1": {
-      "sha512": "iFyUVf607gd/LMRZQjRn+n9SfyQg3qszBMGfebsZVlc0ZS9g0V61ZBfnOouKpCB40iM/p3BoCqpMwiHuEZduZw==",
+    "Microsoft.ML.OnnxConverter/0.20.1": {
+      "sha512": "ZigPON0/E7P4KUyEHT/nUMkKNcfZ/DqZLa/88IXVxFSrde1bPgGUf9gmjYDdqosBfdsfiWJanRae6QfwsPNiZw==",
       "type": "package",
-      "path": "microsoft.ml.tensorflow/2.0.1",
+      "path": "microsoft.ml.onnxconverter/0.20.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/netstandard2.0/Microsoft.ML.OnnxConverter.dll",
+        "lib/netstandard2.0/Microsoft.ML.OnnxConverter.xml",
+        "microsoft.ml.onnxconverter.0.20.1.nupkg.sha512",
+        "microsoft.ml.onnxconverter.nuspec",
+        "mlnetlogo.png"
+      ]
+    },
+    "Microsoft.ML.OnnxRuntime.Managed/1.10.0": {
+      "sha512": "u2FXgm0KmjEx2Wx0MY5e1dsyhzpRt/QVv1qcC23I4v7kLS9vC81nFpvvz6INrRRcG27pST6fFtU7sgK1zRL/Ow==",
+      "type": "package",
+      "path": "microsoft.ml.onnxruntime.managed/1.10.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "Privacy.md",
+        "ThirdPartyNotices.txt",
+        "build/netstandard1.1/Microsoft.ML.OnnxRuntime.Managed.targets",
+        "build/netstandard2.0/Microsoft.ML.OnnxRuntime.Managed.targets",
+        "lib/monoandroid11.0/Microsoft.ML.OnnxRuntime.dll",
+        "lib/monoandroid11.0/Microsoft.ML.OnnxRuntime.pdb",
+        "lib/net5.0/Microsoft.ML.OnnxRuntime.dll",
+        "lib/net5.0/Microsoft.ML.OnnxRuntime.pdb",
+        "lib/netcoreapp3.1/Microsoft.ML.OnnxRuntime.dll",
+        "lib/netcoreapp3.1/Microsoft.ML.OnnxRuntime.pdb",
+        "lib/netstandard1.1/Microsoft.ML.OnnxRuntime.dll",
+        "lib/netstandard1.1/Microsoft.ML.OnnxRuntime.pdb",
+        "lib/netstandard2.0/Microsoft.ML.OnnxRuntime.dll",
+        "lib/netstandard2.0/Microsoft.ML.OnnxRuntime.pdb",
+        "lib/xamarinios10/Microsoft.ML.OnnxRuntime.dll",
+        "lib/xamarinios10/Microsoft.ML.OnnxRuntime.pdb",
+        "microsoft.ml.onnxruntime.managed.1.10.0.nupkg.sha512",
+        "microsoft.ml.onnxruntime.managed.nuspec"
+      ]
+    },
+    "Microsoft.ML.OnnxTransformer/2.0.1": {
+      "sha512": "1UWQe1x0CoqN9VpWiPErVPrYBsXrlsbr1p8s3jmhPkflyLKN8+wVRnEUP1Wc3rNOFviMjpocHHzs51OAL0lPMQ==",
+      "type": "package",
+      "path": "microsoft.ml.onnxtransformer/2.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/netstandard2.0/Microsoft.ML.OnnxTransformer.dll",
+        "lib/netstandard2.0/Microsoft.ML.OnnxTransformer.xml",
+        "microsoft.ml.onnxtransformer.2.0.1.nupkg.sha512",
+        "microsoft.ml.onnxtransformer.nuspec",
+        "mlnetlogo.png"
+      ]
+    },
+    "Microsoft.ML.TensorFlow/1.7.1": {
+      "sha512": "b0wOkjf2kfpLnjHLFfrghyitYERu9Kmd60+PKjLD8lq0Pp7Pg9232h1UPk8HcmbP9QVprg+UXOlGxR9B0O90YQ==",
+      "type": "package",
+      "path": "microsoft.ml.tensorflow/1.7.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -647,15 +761,15 @@
         "THIRD-PARTY-NOTICES.TXT",
         "lib/netstandard2.0/Microsoft.ML.TensorFlow.dll",
         "lib/netstandard2.0/Microsoft.ML.TensorFlow.xml",
-        "microsoft.ml.tensorflow.2.0.1.nupkg.sha512",
+        "microsoft.ml.tensorflow.1.7.1.nupkg.sha512",
         "microsoft.ml.tensorflow.nuspec",
         "mlnetlogo.png"
       ]
     },
-    "Microsoft.ML.Vision/2.0.1": {
-      "sha512": "cbJEtkUpwZODOFqXohU0+SSMuvqsnthTHvIThTdAJh7wg1QqUgH0EAFIuMjYhBQ6q1f5nmMS++JC5CQIYH0d0w==",
+    "Microsoft.ML.Vision/1.7.1": {
+      "sha512": "/KtRQn+ZpSMU9w8lwwVm/A0Ls9KzDpdpZtwiSob0GjRKeEY4fJmIxsZlxmNuHnl9ZrfBraL52RJp6UoQqbKR2A==",
       "type": "package",
-      "path": "microsoft.ml.vision/2.0.1",
+      "path": "microsoft.ml.vision/1.7.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -663,7 +777,7 @@
         "THIRD-PARTY-NOTICES.TXT",
         "lib/netstandard2.0/Microsoft.ML.Vision.dll",
         "lib/netstandard2.0/Microsoft.ML.Vision.xml",
-        "microsoft.ml.vision.2.0.1.nupkg.sha512",
+        "microsoft.ml.vision.1.7.1.nupkg.sha512",
         "microsoft.ml.vision.nuspec",
         "mlnetlogo.png"
       ]
@@ -1535,7 +1649,9 @@
   "projectFileDependencyGroups": {
     "net6.0": [
       "Microsoft.ML >= 2.0.1",
-      "Microsoft.ML.Vision >= 2.0.1",
+      "Microsoft.ML.OnnxConverter >= 0.20.1",
+      "Microsoft.ML.OnnxTransformer >= 2.0.1",
+      "Microsoft.ML.Vision >= 1.7.1",
       "System.Device.Gpio >= 2.2.0-*"
     ]
   },
@@ -1580,9 +1696,17 @@
             "target": "Package",
             "version": "[2.0.1, )"
           },
-          "Microsoft.ML.Vision": {
+          "Microsoft.ML.OnnxConverter": {
+            "target": "Package",
+            "version": "[0.20.1, )"
+          },
+          "Microsoft.ML.OnnxTransformer": {
             "target": "Package",
             "version": "[2.0.1, )"
+          },
+          "Microsoft.ML.Vision": {
+            "target": "Package",
+            "version": "[1.7.1, )"
           },
           "System.Device.Gpio": {
             "target": "Package",

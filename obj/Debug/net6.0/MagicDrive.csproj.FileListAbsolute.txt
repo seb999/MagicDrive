@@ -39,3 +39,6 @@
 /home/sebastien/Git/MagicDrive/obj/Debug/net6.0/MagicDrive.pdb
 /home/sebastien/Git/MagicDrive/obj/Debug/net6.0/MagicDrive.genruntimeconfig.cache
 /home/sebastien/Git/MagicDrive/obj/Debug/net6.0/ref/MagicDrive.dll
+/home/sebastien/Git/MagicDrive/bin/Debug/net6.0/Microsoft.ML.OnnxConverter.dll
+/home/sebastien/Git/MagicDrive/bin/Debug/net6.0/Microsoft.ML.OnnxRuntime.dll
+/home/sebastien/Git/MagicDrive/bin/Debug/net6.0/Microsoft.ML.OnnxTransformer.dll

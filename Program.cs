@@ -14,11 +14,11 @@ class Program
     private static string bashPictureC = @"/home/sebastien/Git/MagicDrive/Script/takePicC.sh";
     private static string bashTimeLapse = @"/home/sebastien/Git/MagicDrive/Script/takeTimeLapse.sh";
     private static bool isActivated = false;
+    private static bool isProcessingPic = false;
+
     private static LedController ledStandBy;
     private static LedController ledDriving;
-
     private static FileWatcher? fileWatcher;
-
 
     static Process extScript;
 
@@ -34,6 +34,8 @@ class Program
 
         Standby();
 
+       
+
     }
 
     private static void Standby()
@@ -44,10 +46,6 @@ class Program
             {
                 ledDriving.On();
                 ledStandBy.Off();
-
-               // var imagePath = GetMostRecentImagePath(pictureFolderPath);
-               /// if (imagePath != null) ProcessImage(imagePath);
-
                 Thread.Sleep(200);
             }
             else
@@ -60,7 +58,17 @@ class Program
 
     private static void OnFileCreated(object sender, FileSystemEventArgs e)
     {
-        Console.WriteLine("new image");
+        string? lastImage = GetMostRecentImagePath(pictureFolderPath);
+        if(lastImage == null) return;
+        Console.WriteLine(lastImage);
+        if(!isProcessingPic) 
+        {
+            ProcessImage(lastImage);
+        }
+        else
+        {
+            return;
+        }
     }
 
     static void OnBtnStartStopChanged(object sender, PinValueChangedEventArgs e)
@@ -94,6 +102,11 @@ class Program
         if (e.ChangeType == PinEventTypes.Falling)
         {
             TakePicture(bashPictureR);
+            ledDriving.Blink();
+            Thread.Sleep(50);
+
+             MLConverterOnnx ttt = new MLConverterOnnx();
+        ttt.ConvertModel();
         }
     }
 
@@ -102,7 +115,8 @@ class Program
         if (e.ChangeType == PinEventTypes.Falling)
         {
             TakePicture(bashPictureC);
-        }
+            ledDriving.Blink();
+            Thread.Sleep(50);        }
     }
 
     static void OnBtnLeftChanged(object sender, PinValueChangedEventArgs e)
@@ -110,6 +124,8 @@ class Program
         if (e.ChangeType == PinEventTypes.Falling)
         {
             TakePicture(bashPictureL);
+            ledDriving.Blink();
+            Thread.Sleep(50);
         }
     }
 
@@ -149,8 +165,8 @@ class Program
 
     private static void ProcessImage(string imagePath)
     {
-        Console.WriteLine($"The image {imagePath} has been processed");
 
+        isProcessingPic = true;
         // var imageBytes = File.ReadAllBytes(imagePath);
 
         // MLModel.ModelInput mlData = new MLModel.ModelInput()
@@ -171,6 +187,9 @@ class Program
         // {
         //     //motor?.TurnLeft(10); //steps and millisecond
         // }
+
+        DeleteImage(imagePath);
+        isProcessingPic = false;
     }
 
     static string? GetMostRecentImagePath(string folderPath)
@@ -193,6 +212,25 @@ class Program
         {
             Console.WriteLine("No image files found in the folder.");
             return null;
+        }
+    }
+
+    static void DeleteImage(string imagePath)
+    {
+        try
+        {
+            if (File.Exists(imagePath))
+            {
+                File.Delete(imagePath); 
+            }
+            else
+            {
+                Console.WriteLine("Image not found.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
         }
     }
 

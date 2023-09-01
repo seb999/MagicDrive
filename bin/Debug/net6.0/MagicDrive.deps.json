@@ -9,7 +9,9 @@
       "MagicDrive/1.0.0": {
         "dependencies": {
           "Microsoft.ML": "2.0.1",
-          "Microsoft.ML.Vision": "2.0.1",
+          "Microsoft.ML.OnnxConverter": "0.20.1",
+          "Microsoft.ML.OnnxTransformer": "2.0.1",
+          "Microsoft.ML.Vision": "1.7.1",
           "System.Device.Gpio": "2.2.0"
         },
         "runtime": {
@@ -123,7 +125,43 @@
           }
         }
       },
-      "Microsoft.ML.TensorFlow/2.0.1": {
+      "Microsoft.ML.OnnxConverter/0.20.1": {
+        "dependencies": {
+          "Google.Protobuf": "3.19.6",
+          "Microsoft.ML": "2.0.1"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.ML.OnnxConverter.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "0.2000.123.8101"
+          }
+        }
+      },
+      "Microsoft.ML.OnnxRuntime.Managed/1.10.0": {
+        "dependencies": {
+          "System.Memory": "4.5.3"
+        },
+        "runtime": {
+          "lib/net5.0/Microsoft.ML.OnnxRuntime.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Microsoft.ML.OnnxTransformer/2.0.1": {
+        "dependencies": {
+          "Google.Protobuf": "3.19.6",
+          "Microsoft.ML": "2.0.1",
+          "Microsoft.ML.OnnxRuntime.Managed": "1.10.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.ML.OnnxTransformer.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "2.0.123.8101"
+          }
+        }
+      },
+      "Microsoft.ML.TensorFlow/1.7.1": {
         "dependencies": {
           "Google.Protobuf": "3.19.6",
           "Microsoft.ML": "2.0.1",
@@ -134,18 +172,18 @@
         "runtime": {
           "lib/netstandard2.0/Microsoft.ML.TensorFlow.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2.0.123.8101"
+            "fileVersion": "1.700.122.15804"
           }
         }
       },
-      "Microsoft.ML.Vision/2.0.1": {
+      "Microsoft.ML.Vision/1.7.1": {
         "dependencies": {
-          "Microsoft.ML.TensorFlow": "2.0.1"
+          "Microsoft.ML.TensorFlow": "1.7.1"
         },
         "runtime": {
           "lib/netstandard2.0/Microsoft.ML.Vision.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2.0.123.8101"
+            "fileVersion": "1.700.122.15804"
           }
         }
       },
@@ -326,19 +364,40 @@
       "path": "microsoft.ml.dataview/2.0.1",
       "hashPath": "microsoft.ml.dataview.2.0.1.nupkg.sha512"
     },
-    "Microsoft.ML.TensorFlow/2.0.1": {
+    "Microsoft.ML.OnnxConverter/0.20.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-iFyUVf607gd/LMRZQjRn+n9SfyQg3qszBMGfebsZVlc0ZS9g0V61ZBfnOouKpCB40iM/p3BoCqpMwiHuEZduZw==",
-      "path": "microsoft.ml.tensorflow/2.0.1",
-      "hashPath": "microsoft.ml.tensorflow.2.0.1.nupkg.sha512"
+      "sha512": "sha512-ZigPON0/E7P4KUyEHT/nUMkKNcfZ/DqZLa/88IXVxFSrde1bPgGUf9gmjYDdqosBfdsfiWJanRae6QfwsPNiZw==",
+      "path": "microsoft.ml.onnxconverter/0.20.1",
+      "hashPath": "microsoft.ml.onnxconverter.0.20.1.nupkg.sha512"
     },
-    "Microsoft.ML.Vision/2.0.1": {
+    "Microsoft.ML.OnnxRuntime.Managed/1.10.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-cbJEtkUpwZODOFqXohU0+SSMuvqsnthTHvIThTdAJh7wg1QqUgH0EAFIuMjYhBQ6q1f5nmMS++JC5CQIYH0d0w==",
-      "path": "microsoft.ml.vision/2.0.1",
-      "hashPath": "microsoft.ml.vision.2.0.1.nupkg.sha512"
+      "sha512": "sha512-u2FXgm0KmjEx2Wx0MY5e1dsyhzpRt/QVv1qcC23I4v7kLS9vC81nFpvvz6INrRRcG27pST6fFtU7sgK1zRL/Ow==",
+      "path": "microsoft.ml.onnxruntime.managed/1.10.0",
+      "hashPath": "microsoft.ml.onnxruntime.managed.1.10.0.nupkg.sha512"
+    },
+    "Microsoft.ML.OnnxTransformer/2.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1UWQe1x0CoqN9VpWiPErVPrYBsXrlsbr1p8s3jmhPkflyLKN8+wVRnEUP1Wc3rNOFviMjpocHHzs51OAL0lPMQ==",
+      "path": "microsoft.ml.onnxtransformer/2.0.1",
+      "hashPath": "microsoft.ml.onnxtransformer.2.0.1.nupkg.sha512"
+    },
+    "Microsoft.ML.TensorFlow/1.7.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-b0wOkjf2kfpLnjHLFfrghyitYERu9Kmd60+PKjLD8lq0Pp7Pg9232h1UPk8HcmbP9QVprg+UXOlGxR9B0O90YQ==",
+      "path": "microsoft.ml.tensorflow/1.7.1",
+      "hashPath": "microsoft.ml.tensorflow.1.7.1.nupkg.sha512"
+    },
+    "Microsoft.ML.Vision/1.7.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-/KtRQn+ZpSMU9w8lwwVm/A0Ls9KzDpdpZtwiSob0GjRKeEY4fJmIxsZlxmNuHnl9ZrfBraL52RJp6UoQqbKR2A==",
+      "path": "microsoft.ml.vision/1.7.1",
+      "hashPath": "microsoft.ml.vision.1.7.1.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/2.0.0": {
       "type": "package",
