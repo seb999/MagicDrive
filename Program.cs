@@ -96,7 +96,6 @@ class Program
 
         }
     }
-
     static void OnBtnRightChanged(object sender, PinValueChangedEventArgs e)
     {
         if (e.ChangeType == PinEventTypes.Falling)
@@ -167,26 +166,8 @@ class Program
     {
 
         isProcessingPic = true;
-        // var imageBytes = File.ReadAllBytes(imagePath);
-
-        // MLModel.ModelInput mlData = new MLModel.ModelInput()
-        // {
-        //     ImageSource = imageBytes,
-        // };
-
-        // //Make a single prediction
-        // var predictionResult = MLModel.Predict(mlData);
-
-        // Console.WriteLine($"Prediction : {predictionResult.PredictedLabel}");
-        // if (predictionResult.PredictedLabel == MyEnum.Correction.Left.ToString() && predictionResult.Score[0] > 60)
-        // {
-        //     //motor?.TurnRight(10); //steps and millisecond
-        // }
-
-        // if (predictionResult.PredictedLabel == MyEnum.Correction.Right.ToString() && predictionResult.Score[1] > 60)
-        // {
-        //     //motor?.TurnLeft(10); //steps and millisecond
-        // }
+      
+        //Call Python service to inference model
 
         DeleteImage(imagePath);
         isProcessingPic = false;
