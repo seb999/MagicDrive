@@ -42,17 +42,13 @@
               "target": "Package",
               "version": "[2.0.1, )"
             },
-            "Microsoft.ML.OnnxConverter": {
-              "target": "Package",
-              "version": "[0.20.1, )"
-            },
-            "Microsoft.ML.OnnxTransformer": {
-              "target": "Package",
-              "version": "[2.0.1, )"
-            },
             "Microsoft.ML.Vision": {
               "target": "Package",
               "version": "[1.7.1, )"
+            },
+            "SocketIOClient": {
+              "target": "Package",
+              "version": "[3.0.6, )"
             },
             "System.Device.Gpio": {
               "target": "Package",

@@ -5,97 +5,156 @@ using MagicDrive.Misc;
 using MagicDrive.ML;
 using System.Diagnostics;
 using System.Linq;
+using MarginCoin.Misc;
+using SocketIOClient;
+using System.Text.Json;
 
 class Program
 {
-    private static string pictureFolderPath = @"/home/sebastien/Pictures/timeLapse";
     private static string bashPictureL = @"/home/sebastien/Git/MagicDrive/Script/takePicL.sh";
     private static string bashPictureR = @"/home/sebastien/Git/MagicDrive/Script/takePicR.sh";
     private static string bashPictureC = @"/home/sebastien/Git/MagicDrive/Script/takePicC.sh";
-    private static string bashTimeLapse = @"/home/sebastien/Git/MagicDrive/Script/takeTimeLapse.sh";
-    private static bool isActivated = false;
-    private static bool isProcessingPic = false;
+    private static string bashPictureVideo = @"/home/sebastien/Git/MagicDrive/Script/takeVideo.sh";
 
+    
+    private static bool isAutoDrive = false;
     private static LedController ledStandBy;
     private static LedController ledDriving;
-    private static FileWatcher? fileWatcher;
-
-    static Process extScript;
+    private static StepperMotorController motor;
+    private static int offset = 0;
 
     static void Main(string[] args)
     {
-        ledStandBy = new LedController(23);
-        ledDriving = new LedController(24);
-        var startStopButton = new SwitchController(18, OnBtnStartStopChanged);
-        var rightButton = new SwitchController(25, OnBtnRightChanged);
-        var centerButton = new SwitchController(8, OnBtnCenterChanged);
-        var leftButton = new SwitchController(7, OnBtnLeftChanged);
-        fileWatcher = new FileWatcher(pictureFolderPath, OnFileCreated);
+        //leds
+        ledStandBy = new LedController(2);
+        ledDriving = new LedController(3);
+        motor = new StepperMotorController();
+
+        //keys
+        var key1 = new SwitchController(21, OnBtnKey1Changed);
+        var key2 = new SwitchController(20, OnBtnKey1Changed);
+        var key3 = new SwitchController(16, OnBtnKey3Changed);
+
+        //Joystick
+        var right = new SwitchController(26, OnBtnRightChanged);
+        var center = new SwitchController(13, OnBtnCenterChanged);
+        var left = new SwitchController(5, OnBtnLeftChanged);
+
+        var down = new SwitchController(6, OnBtnUpChanged);
+        var up = new SwitchController(19, OnBtnDownChanged);
+
+
+        ConnectToCamera();
 
         Standby();
-
-       
-
     }
 
     private static void Standby()
     {
         while (true)
         {
-            if (isActivated)
+            if (isAutoDrive)
             {
-                ledDriving.On();
                 ledStandBy.Off();
-                Thread.Sleep(200);
+                ledDriving.Blink();
             }
             else
             {
-                ledStandBy.Blink();
                 ledDriving.Off();
+                ledStandBy.Blink();
             }
         }
     }
 
-    private static void OnFileCreated(object sender, FileSystemEventArgs e)
+    private static void MotorOffset(MyEnum.offset dir)
     {
-        string? lastImage = GetMostRecentImagePath(pictureFolderPath);
-        if(lastImage == null) return;
-        Console.WriteLine(lastImage);
-        if(!isProcessingPic) 
+        switch (dir)
         {
-            ProcessImage(lastImage);
-        }
-        else
-        {
-            return;
+            case MyEnum.offset.up:
+                offset+=10;
+                break;
+
+            case MyEnum.offset.down:
+                offset-=10;
+                break;
+
+            default:
+                break;
         }
     }
 
-    static void OnBtnStartStopChanged(object sender, PinValueChangedEventArgs e)
+    private async static void ConnectToCamera()
+    {
+        try
+        {
+            var client = new SocketIO("http://127.0.0.1:5000");
+            client.On("message", response =>
+            {
+                string result = response.GetValue<string>();
+                Console.WriteLine(result);
+                if (isAutoDrive)
+                {
+                    PredictionResult predictionResult = JsonSerializer.Deserialize<PredictionResult>(result);
+
+                    AdjustDirection(predictionResult.label, predictionResult.score);
+                }
+            });
+            await client.ConnectAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error connecting to the Socket.IO server: " + ex.Message);
+            // You can take further action here, such as logging or handling the error.
+        }
+    }
+
+    static void OnBtnKey1Changed(object sender, PinValueChangedEventArgs e)
     {
         if (e.ChangeType == PinEventTypes.Falling)
         {
-            if (!isActivated)
+            if (!isAutoDrive)
             {
-                isActivated = true;
-                ledStandBy.Off();
-                ledDriving.On();
-
-                TakeTimeLapse(bashTimeLapse);
-
-                Console.WriteLine("time lapse running");
-                Thread.Sleep(100);
+                isAutoDrive = true;
+                ledDriving.Blink();
             }
             else
             {
-                isActivated = false;
-                extScript.Close();
-                ledDriving.Off();
-                Thread.Sleep(100);
+                isAutoDrive = false;
             }
 
+            Thread.Sleep(50);
         }
     }
+
+    static void OnBtnKey3Changed(object sender, PinValueChangedEventArgs e)
+    {
+        if (e.ChangeType == PinEventTypes.Falling)
+        {
+            TakePicture(bashPictureVideo);
+            ledDriving.Blink();
+            Thread.Sleep(50);
+        }
+
+    }
+
+    static void OnBtnUpChanged(object sender, PinValueChangedEventArgs e)
+    {
+        if (e.ChangeType == PinEventTypes.Falling)
+        {
+            MotorOffset(MyEnum.offset.up);
+            motor.TurnLeft(600 + offset);
+        }
+    }
+
+     static void OnBtnDownChanged(object sender, PinValueChangedEventArgs e)
+    {
+       if (e.ChangeType == PinEventTypes.Falling)
+        {
+            MotorOffset(MyEnum.offset.down);
+            motor.TurnRight(600 + offset);
+        }
+    }
+
     static void OnBtnRightChanged(object sender, PinValueChangedEventArgs e)
     {
         if (e.ChangeType == PinEventTypes.Falling)
@@ -103,9 +162,6 @@ class Program
             TakePicture(bashPictureR);
             ledDriving.Blink();
             Thread.Sleep(50);
-
-             MLConverterOnnx ttt = new MLConverterOnnx();
-        ttt.ConvertModel();
         }
     }
 
@@ -115,7 +171,8 @@ class Program
         {
             TakePicture(bashPictureC);
             ledDriving.Blink();
-            Thread.Sleep(50);        }
+            Thread.Sleep(50);
+        }
     }
 
     static void OnBtnLeftChanged(object sender, PinValueChangedEventArgs e)
@@ -140,37 +197,21 @@ class Program
         extScript.WaitForExit();
     }
 
-    static void TakeTimeLapse1(string bashPath)
+    private static void AdjustDirection(string label, float score)
     {
-        //find a way to start and kill the timelaspe
-        Process extScript = new Process();
-        extScript.StartInfo.UseShellExecute = true;
-        extScript.StartInfo.FileName = bashPath;
-        extScript.StartInfo.CreateNoWindow = true;
-        extScript.Start();
-        extScript.WaitForExit();
-    }
+        switch (label)
+        {
+            case "left":
+                //motor.TurnRight(600);
+                break;
 
-    private static void TakeTimeLapse(string bashPath)
-    {
-        //find a way to start and kill the timelaspe
-        extScript = new Process();
-        extScript.StartInfo.UseShellExecute = true;
-        extScript.StartInfo.FileName = bashPath;
-        extScript.StartInfo.CreateNoWindow = true;
-        extScript.Start();
-        //extScript.WaitForExit();
-    }
+            case "right":
+                //motor.TurnLeft(600);
+                break;
 
-    private static void ProcessImage(string imagePath)
-    {
-
-        isProcessingPic = true;
-      
-        //Call Python service to inference model
-
-        DeleteImage(imagePath);
-        isProcessingPic = false;
+            case "center":
+                break;
+        }
     }
 
     static string? GetMostRecentImagePath(string folderPath)
@@ -202,7 +243,7 @@ class Program
         {
             if (File.Exists(imagePath))
             {
-                File.Delete(imagePath); 
+                File.Delete(imagePath);
             }
             else
             {
@@ -212,16 +253,6 @@ class Program
         catch (Exception ex)
         {
             Console.WriteLine($"An error occurred: {ex.Message}");
-        }
-    }
-
-    private static void CleanImageFolder(string folderPath)
-    {
-        //We delete all files after and wait a new picture from the camera
-        DirectoryInfo di = new DirectoryInfo(folderPath);
-        foreach (FileInfo file in di.EnumerateFiles())
-        {
-            file.Delete();
         }
     }
 

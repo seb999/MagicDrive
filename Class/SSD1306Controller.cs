@@ -1,95 +1,134 @@
+using System;
 using System.Device.Gpio;
-using System.Device.I2c;
+using System.Device.Spi;
+using System.Threading;
+using MagicDrive.Misc;
 
 public class SSD1306Controller
 {
-    private const int ResetPin = 17;
-    private const int Address = 0x3C;
+    private SpiDevice _spi;
+    private GpioController _gpioController;
+    private int _resetPin;
+    private int _dcPin;
 
-    private readonly I2cDevice _i2cDevice;
-    private readonly GpioController _gpioController;
+    private byte[] _buffer;
 
-    public SSD1306Controller()
+    public SSD1306Controller(SpiDevice spi, int resetPin, int dcPin)
     {
-        _i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Address));
-        _gpioController = new GpioController(PinNumberingScheme.Board);
+        _spi = spi;
+        _resetPin = resetPin;
+        _dcPin = dcPin;
 
-        // Set up the reset pin
-        _gpioController.OpenPin(ResetPin, PinMode.Output);
-        _gpioController.Write(ResetPin, PinValue.Low);
-        System.Threading.Thread.Sleep(50);
-        _gpioController.Write(ResetPin, PinValue.High);
-        System.Threading.Thread.Sleep(50);
-
-        // Initialize the display
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0xAE); // Display off
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0xD5); // Set display clock divide ratio/oscillator frequency
-        _i2cDevice.WriteByte(0xF0); // Set divide ratio
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0xA8); // Set multiplex ratio
-        _i2cDevice.WriteByte(0x3F); // 1/64 duty
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0xD3); // Set display offset
-        _i2cDevice.WriteByte(0x00); // No offset
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0x40); // Set start line
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0x8D); // Charge pump setting
-        _i2cDevice.WriteByte(0x14); // Enable charge pump
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0x20); // Set memory addressing mode
-        _i2cDevice.WriteByte(0x00); // Horizontal addressing mode
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0xA1); // Set segment re-map
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0xC8); // Set COM output scan direction
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0xDA); // Set COM pins hardware configuration
-        _i2cDevice.WriteByte(0x12); // Alternative COM pin configuration
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0x81); // Set contrast control
-        _i2cDevice.WriteByte(0xCF); // Set contrast
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0xD9); // Set pre-charge period
-        _i2cDevice.WriteByte(0xF1); // Set pre-charge period
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0xA4); // Display all on/resume to RAM content
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0xA6); // Normal display mode (A6), Inverse display mode (A7)
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0xAF); // Display on
+        InitializeGpio();
+        InitializeDisplay();
     }
 
-    public void ClearDisplay()
+    private void InitializeGpio()
     {
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0x21); // Set column address
-        _i2cDevice.WriteByte(0x00); // Column start address
-        _i2cDevice.WriteByte(0x7F); // Column end address
+        _gpioController = new GpioController();
 
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0x22); // Set page address
-        _i2cDevice.WriteByte(0x00); // Page start address
-        _i2cDevice.WriteByte(0x07); // Page end address
+        // Set up the reset and data/command pins
+        _gpioController.OpenPin(_resetPin, PinMode.Output);
+        _gpioController.OpenPin(_dcPin, PinMode.Output);
 
-        for (int i = 0; i < 1024; i++)
+        // Perform a hardware reset
+        _gpioController.Write(_resetPin, PinValue.Low);
+        Thread.Sleep(100);
+        _gpioController.Write(_resetPin, PinValue.High);
+    }
+
+    private void InitializeDisplay()
+    {
+        // Initialize the SSD1306 display
+        SendCommand(0xAE); // Display Off
+
+        // Set the display to horizontal addressing mode
+        SendCommand(0x20);
+        SendCommand(0x00);
+
+        // Set the display to normal scan direction
+        SendCommand(0xC0);
+
+        // Set the display to page addressing mode
+        SendCommand(0x02);
+
+        // Set the contrast level (adjust as needed)
+        SendCommand(0x81);
+        SendCommand(0xFF);
+
+        // Set the segment re-map
+        SendCommand(0xA1);
+
+        // Set the COM output scan direction
+        SendCommand(0xC8);
+
+        // Set the display to inverse mode (0xA6 for normal mode)
+        SendCommand(0xA7);
+
+        SendCommand(0xAF); // Display On
+    }
+
+    public void Clear()
+    {
+        // Clear the display by filling it with zeros
+        byte[] buffer = new byte[1025]; // 128x64 / 8
+        buffer[0] = 0x40; // Data Mode
+        _spi.Write(buffer);
+    }
+
+    public void DrawText(int x, int y, string text)
+    {
+        foreach (char character in text)
         {
-            _i2cDevice.WriteByte(0x00); // Write zeros to all display memory
+            if (character < 32 || character > 126)
+            {
+                // Skip characters that are not in the font
+                continue;
+            }
+
+            byte[] charData = Font5x7.Data[character - 32]; // Adjust for the ASCII offset
+
+            for (int i = 0; i < 7; i++)
+            {
+                byte line = charData[i];
+                for (int j = 0; j < 5; j++)
+                {
+                    if ((line & (1 << j)) != 0)
+                    {
+                        DrawPixel(x + j, y + i, true);
+                    }
+                }
+            }
+
+            // Move to the next character position
+            x += 6; // 5 columns + 1 column spacing
+        }
+    }
+
+    public void DrawHorizontalArrow(int x, int y, int length, MyEnum.ArrowDirection direction)
+    {
+        // Check the direction of the arrow
+        bool isLeftArrow = direction == MyEnum.ArrowDirection.Left;
+
+        // Calculate arrowhead size (2 pixels on each side)
+        int arrowheadSize = 2;
+
+        // Draw the arrow's body
+        for (int i = 0; i < length; i++)
+        {
+            int xPos = isLeftArrow ? (x - i) : (x + i);
+            DrawPixel(xPos, y, true);
+        }
+
+        // Draw the arrow's head
+        for (int i = 0; i < arrowheadSize; i++)
+        {
+            int xPos = isLeftArrow ? (x - length - i) : (x + length + i);
+            for (int j = -i; j <= i; j++)
+            {
+                int yPos = y + j;
+                DrawPixel(xPos, yPos, true);
+            }
         }
     }
 
@@ -97,79 +136,45 @@ public class SSD1306Controller
     {
         if (x < 0 || x >= 128 || y < 0 || y >= 64)
         {
-            return; // Don't draw outside the bounds of the display
+            return; // Out of bounds
         }
 
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0x21); // Set column address
-        _i2cDevice.WriteByte((byte)x); // Column start address
-        _i2cDevice.WriteByte((byte)127); // Column end address
-
-        _i2cDevice.WriteByte(0x00); // Command byte
-        _i2cDevice.WriteByte(0x22); // Set page address
-        _i2cDevice.WriteByte((byte)(y / 8)); // Page start address
-        _i2cDevice.WriteByte((byte)7); // Page end address
-
-        byte pixelMask = (byte)(1 << (y % 8));
-        byte pixelValue = (byte)(_i2cDevice.ReadByte() | pixelMask);
-        _i2cDevice.WriteByte(pixelValue); // Write the pixel data to the display memory
-    }
-
-    public void WriteChar(char character, Font font, int x, int y, bool color)
-    {
-        byte[] charData = font.GetCharData(character);
-        int charWidth = font.CharWidth;
-        int charHeight = font.CharHeight;
-
-        for (int row = 0; row < charHeight; row++)
+        if (color)
         {
-            byte rowData = charData[row];
-
-            for (int col = 0; col < charWidth; col++)
-            {
-                if ((rowData & 0x80) != 0)
-                {
-                    DrawPixel(x + col, y + row, color);
-                }
-
-                rowData <<= 1;
-            }
+            _buffer[x + (y / 8) * 128] |= (byte)(1 << (y % 8));
         }
-    }
-}
-
-public class Font
-{
-    private byte[][] _charData;
-    private int _charWidth;
-    private int _charHeight;
-
-    public Font(byte[][] charData, int charWidth, int charHeight)
-    {
-        _charData = charData;
-        _charWidth = charWidth;
-        _charHeight = charHeight;
-    }
-
-    public byte[] GetCharData(char character)
-    {
-        int index = (int)character - 32;
-
-        if (index < 0 || index >= _charData.Length)
+        else
         {
-            return null;
+            _buffer[x + (y / 8) * 128] &= (byte)~(1 << (y % 8));
         }
-
-        return _charData[index];
     }
 
-    public int CharWidth
+    public void SendDisplayData()
     {
-        get { return _charWidth; }
+        SendCommand(0x21); // Set Column Address
+        SendCommand(0);    // Start Column
+        SendCommand(127);  // End Column
+
+        SendCommand(0x22); // Set Page Address
+        SendCommand(0);    // Start Page
+        SendCommand(7);    // End Page
+
+        _gpioController.Write(_dcPin, PinValue.High); // Data Mode
+
+        foreach (byte dataByte in _buffer)
+        {
+            _spi.WriteByte(dataByte);
+        }
     }
 
-    public int CharHeight
+    public void Show()
     {
-        get { return _charHeight; }
+        SendDisplayData();
+    }
+
+    private void SendCommand(byte command)
+    {
+        _gpioController.Write(_dcPin, PinValue.Low); // Command Mode
+        _spi.WriteByte(command);
     }
 }

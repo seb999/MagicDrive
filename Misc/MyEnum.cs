@@ -7,5 +7,16 @@ namespace MagicDrive.Misc
             Left,
             Right,
         }
+
+        public enum ArrowDirection
+        {
+            Left,
+            Right
+        }
+
+        public enum offset{
+            up,
+            down
+        }
     }
 }
