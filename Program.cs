@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Device.Gpio;
+using System.Device.Spi;
 using System.Threading;
 using MagicDrive.Misc;
 using MagicDrive.ML;
@@ -16,12 +17,15 @@ class Program
     private static string bashPictureC = @"/home/sebastien/Git/MagicDrive/Script/takePicC.sh";
     private static string bashPictureVideo = @"/home/sebastien/Git/MagicDrive/Script/takeVideo.sh";
 
-    
+
     private static bool isAutoDrive = false;
     private static LedController ledStandBy;
     private static LedController ledDriving;
     private static StepperMotorController motor;
     private static int offset = 0;
+    private static bool booting = true;
+    private static SSD1306Controller oled;
+
 
     static void Main(string[] args)
     {
@@ -43,7 +47,23 @@ class Program
         var down = new SwitchController(6, OnBtnUpChanged);
         var up = new SwitchController(19, OnBtnDownChanged);
 
+        // Create an SPI device
+        var spiConnectionSettings = new SpiConnectionSettings(0, 0)
+        {
+            ClockFrequency = 1000000,
+            Mode = 0b00
+        };
+        var spiDevice = SpiDevice.Create(spiConnectionSettings);
+        oled = new SSD1306Controller(spiDevice, 25, 24);
 
+        oled.FlipScreen();
+        oled.DrawRect(92, 52, 40,40,1);
+        oled.DrawText(100, 55, "X", 1);
+        oled.DrawText(110, 55, offset.ToString(), 1);
+        oled.Display();
+
+        booting = false;
+        
         ConnectToCamera();
 
         Standby();
@@ -55,13 +75,22 @@ class Program
         {
             if (isAutoDrive)
             {
-                ledStandBy.Off();
-                ledDriving.Blink();
+                oled.FillRect(0, 0, 67, 12, 0);
+                oled.Display();
+                oled.FillRect(87, 0, 42, 12, 1);
+                oled.DrawText(90, 2, "AUTO", 0);
+                oled.Display();
             }
             else
             {
-                ledDriving.Off();
-                ledStandBy.Blink();
+                oled.FillRect(0, 0, 67, 12, 1);
+                oled.FillRect(87, 0, 42, 12, 0);
+                oled.DrawText(2, 2, "STANDBY", 0);
+                oled.Display();
+                Thread.Sleep(800);
+                oled.FillRect(0, 0, 67, 12, 0);
+                oled.Display();
+                Thread.Sleep(500);
             }
         }
     }
@@ -71,11 +100,19 @@ class Program
         switch (dir)
         {
             case MyEnum.offset.up:
-                offset+=10;
+                 oled.DrawText(110, 55, offset.ToString(), 0);
+                oled.Display();
+                offset += 1;
+                 oled.DrawText(110, 55, offset.ToString(), 1);
+                oled.Display();
                 break;
 
             case MyEnum.offset.down:
-                offset-=10;
+                oled.DrawText(110, 55, offset.ToString(), 0);
+                oled.Display();
+                offset -= 1;
+                oled.DrawText(110, 55, offset.ToString(), 1);
+                oled.Display();
                 break;
 
             default:
@@ -141,17 +178,20 @@ class Program
     {
         if (e.ChangeType == PinEventTypes.Falling)
         {
+            if (booting) return;
             MotorOffset(MyEnum.offset.up);
-            motor.TurnLeft(600 + offset);
+            //motor.TurnLeft(600 + offsetx10);
         }
     }
 
-     static void OnBtnDownChanged(object sender, PinValueChangedEventArgs e)
+    static void OnBtnDownChanged(object sender, PinValueChangedEventArgs e)
     {
-       if (e.ChangeType == PinEventTypes.Falling)
+
+        if (e.ChangeType == PinEventTypes.Falling)
         {
+            if (booting) return;
             MotorOffset(MyEnum.offset.down);
-            motor.TurnRight(600 + offset);
+            //motor.TurnRight(600 + offsetx10);
         }
     }
 
@@ -159,9 +199,11 @@ class Program
     {
         if (e.ChangeType == PinEventTypes.Falling)
         {
-            TakePicture(bashPictureR);
-            ledDriving.Blink();
-            Thread.Sleep(50);
+            if (booting) return;
+            oled.On();
+            // TakePicture(bashPictureR);
+            // ledDriving.Blink();
+            // Thread.Sleep(50);lll
         }
     }
 
@@ -169,6 +211,7 @@ class Program
     {
         if (e.ChangeType == PinEventTypes.Falling)
         {
+            if (booting) return;
             TakePicture(bashPictureC);
             ledDriving.Blink();
             Thread.Sleep(50);
@@ -179,9 +222,11 @@ class Program
     {
         if (e.ChangeType == PinEventTypes.Falling)
         {
-            TakePicture(bashPictureL);
-            ledDriving.Blink();
-            Thread.Sleep(50);
+            if (booting) return;
+            // TakePicture(bashPictureL);
+            // ledDriving.Blink();
+            // Thread.Sleep(50);
+            oled.Off();
         }
     }
 

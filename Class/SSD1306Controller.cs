@@ -1,8 +1,10 @@
-using System;
 using System.Device.Gpio;
 using System.Device.Spi;
-using System.Threading;
+using SkiaSharp;
 using MagicDrive.Misc;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+//https://github.com/rene-mt/esp8266-oled-sh1106/blob/master/SH1106.cpp
 
 public class SSD1306Controller
 {
@@ -10,73 +12,45 @@ public class SSD1306Controller
     private GpioController _gpioController;
     private int _resetPin;
     private int _dcPin;
-
     private byte[] _buffer;
 
-    public SSD1306Controller(SpiDevice spi, int resetPin, int dcPin)
+    #region Constructor / Initialisation
+
+    public SSD1306Controller(SpiDevice spi, int rst, int dcPin)
     {
         _spi = spi;
-        _resetPin = resetPin;
+        _resetPin = rst;
         _dcPin = dcPin;
-
-        InitializeGpio();
-        InitializeDisplay();
-    }
-
-    private void InitializeGpio()
-    {
+        _buffer = new byte[1024];
         _gpioController = new GpioController();
-
-        // Set up the reset and data/command pins
         _gpioController.OpenPin(_resetPin, PinMode.Output);
         _gpioController.OpenPin(_dcPin, PinMode.Output);
 
-        // Perform a hardware reset
+        Thread.Sleep(50);
         _gpioController.Write(_resetPin, PinValue.Low);
-        Thread.Sleep(100);
+        Thread.Sleep(50);
         _gpioController.Write(_resetPin, PinValue.High);
+        InitializeDisplay();
     }
 
     private void InitializeDisplay()
     {
-        // Initialize the SSD1306 display
         SendCommand(0xAE); // Display Off
-
-        // Set the display to horizontal addressing mode
-        SendCommand(0x20);
-        SendCommand(0x00);
-
-        // Set the display to normal scan direction
-        SendCommand(0xC0);
-
-        // Set the display to page addressing mode
-        SendCommand(0x02);
-
-        // Set the contrast level (adjust as needed)
-        SendCommand(0x81);
-        SendCommand(0xFF);
-
-        // Set the segment re-map
-        SendCommand(0xA1);
-
-        // Set the COM output scan direction
-        SendCommand(0xC8);
-
-        // Set the display to inverse mode (0xA6 for normal mode)
-        SendCommand(0xA7);
-
+        SendCommand(0x00); // Horizontal addressing mode
+        SendCommand(0xA1); // Segment re-map
+        SendCommand(0xC0); // COM Output Scan Direction
+        SendCommand(0xDA); // Common pads hardware: alternative
+        SendCommand(0x12);
+        SendCommand(0x81); // Contrast Control
+        SendCommand(0xCF);
+        SendCommand(0xA4); // Entire Display On/Off
+        SendCommand(0xA6); // Normal Display
         SendCommand(0xAF); // Display On
     }
 
-    public void Clear()
-    {
-        // Clear the display by filling it with zeros
-        byte[] buffer = new byte[1025]; // 128x64 / 8
-        buffer[0] = 0x40; // Data Mode
-        _spi.Write(buffer);
-    }
+    #endregion
 
-    public void DrawText(int x, int y, string text)
+    public void DrawText(int x, int y, string text, int color)
     {
         foreach (char character in text)
         {
@@ -86,95 +60,135 @@ public class SSD1306Controller
                 continue;
             }
 
-            byte[] charData = Font5x7.Data[character - 32]; // Adjust for the ASCII offset
+            byte[] charData = Font.Font8x12[character - 32]; // Adjust for the ASCII offset
 
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < 8; i++)
             {
                 byte line = charData[i];
-                for (int j = 0; j < 5; j++)
+                for (int j = 0; j < 8; j++)
                 {
                     if ((line & (1 << j)) != 0)
                     {
-                        DrawPixel(x + j, y + i, true);
+                        SetPixel(x + j, y + i, color);
                     }
                 }
             }
 
             // Move to the next character position
-            x += 6; // 5 columns + 1 column spacing
+            x += 9; // 5 columns + 1 column spacing
         }
     }
 
-    public void DrawHorizontalArrow(int x, int y, int length, MyEnum.ArrowDirection direction)
+    public void Display()
     {
-        // Check the direction of the arrow
-        bool isLeftArrow = direction == MyEnum.ArrowDirection.Left;
+        SendCommand(0x21);// Set Column Address
+        SendCommand(0x00);// Start Column
+        SendCommand(0x7F); // End Column (127)
 
-        // Calculate arrowhead size (2 pixels on each side)
-        int arrowheadSize = 2;
+        SendCommand(0x22);// Set Page Address
+        SendCommand(0x0);// Start Page
+        SendCommand(0x7); // End Page
 
-        // Draw the arrow's body
-        for (int i = 0; i < length; i++)
+        SendCommand(0x40 | 0x00); //Start line
+
+        for (byte page = 0; page < 64 / 8; page++)
         {
-            int xPos = isLeftArrow ? (x - i) : (x + i);
-            DrawPixel(xPos, y, true);
-        }
-
-        // Draw the arrow's head
-        for (int i = 0; i < arrowheadSize; i++)
-        {
-            int xPos = isLeftArrow ? (x - length - i) : (x + length + i);
-            for (int j = -i; j <= i; j++)
+            for (byte col = 2; col < 130; col++)
             {
-                int yPos = y + j;
-                DrawPixel(xPos, yPos, true);
+                SendCommand((byte)(0xB0 + page)); //Page start address + page
+                SendCommand((byte)(col & 0xF));
+                SendCommand((byte)(0x10 | (col >> 4))); //Set high column
+                                                        // digitalWrite(myCS, HIGH);
+                _gpioController.Write(_dcPin, PinValue.High);   // data mode
+                                                                // digitalWrite(myCS, LOW);
+                _spi.WriteByte(_buffer[col - 2 + page * 128]);
+
             }
         }
     }
 
-    public void DrawPixel(int x, int y, bool color)
-    {
-        if (x < 0 || x >= 128 || y < 0 || y >= 64)
-        {
-            return; // Out of bounds
+    public void FlipScreen() {
+        SendCommand(0xA0);              //SEGREMAP   //Rotate screen 180 deg
+        SendCommand(0xDA);
+        SendCommand(0x22);
+        SendCommand(0xC0);            //COMSCANDEC  Rotate screen 180 Deg
         }
 
-        if (color)
-        {
-            _buffer[x + (y / 8) * 128] |= (byte)(1 << (y % 8));
-        }
-        else
-        {
-            _buffer[x + (y / 8) * 128] &= (byte)~(1 << (y % 8));
-        }
-    }
-
-    public void SendDisplayData()
-    {
-        SendCommand(0x21); // Set Column Address
-        SendCommand(0);    // Start Column
-        SendCommand(127);  // End Column
-
-        SendCommand(0x22); // Set Page Address
-        SendCommand(0);    // Start Page
-        SendCommand(7);    // End Page
-
-        _gpioController.Write(_dcPin, PinValue.High); // Data Mode
-
-        foreach (byte dataByte in _buffer)
-        {
-            _spi.WriteByte(dataByte);
-        }
-    }
-
-    public void Show()
-    {
-        SendDisplayData();
-    }
+    #region Base
 
     private void SendCommand(byte command)
     {
         _gpioController.Write(_dcPin, PinValue.Low); // Command Mode
         _spi.WriteByte(command);
+        _gpioController.Write(_dcPin, PinValue.High);
     }
+
+    public void SetPixel(int x, int y, int color)
+    {
+        if (x >= 0 && x < 128 && y >= 0 && y < 64)
+        {
+            switch (color)
+            {
+                case 1:
+                    _buffer[x + (y / 8) * 128] |= (byte)(1 << (y & 7));
+                    break;
+
+                case 0:
+                    _buffer[x + (y / 8) * 128] &= (byte)~(1 << (y & 7));
+                    break;
+            }
+        }
+    }
+
+    public void On()
+    {
+        SendCommand(0xAF); // Display On
+    }
+
+    public void Off()
+    {
+        SendCommand(0xAE); // Display Off
+    }
+
+    public void SetContrast(byte contrast)
+    {
+        SendCommand(0x81);
+        SendCommand(contrast);
+    }
+
+    public void Clear()
+    {
+        Array.Clear(_buffer, 0, _buffer.Length);
+    }
+
+    #endregion
+
+    #region Drawing
+
+    public void DrawRect(int x, int y, int width, int height, int color)
+    {
+        for (int i = x; i < x + width; i++)
+        {
+            SetPixel(i, y, 1);
+            SetPixel(i, y + height, color);
+        }
+        for (int i = y; i < y + height; i++)
+        {
+            SetPixel(x, i, 1);
+            SetPixel(x + width, i, color);
+        }
+    }
+
+    public void FillRect(int x, int y, int width, int height, int color)
+    {
+        for (int i = x; i < x + width; i++)
+        {
+            for (int j = y; j < y + height; j++)
+            {
+                SetPixel(i, j, color);
+            }
+        }
+    }
+
+    #endregion
 }

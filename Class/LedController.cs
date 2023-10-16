@@ -5,6 +5,8 @@ public class LedController
     private GpioController _controller{get;set;}
     private readonly int pin;
 
+    private static SSD1306Controller oled;
+
     public LedController(int pinNumber)
     {
         this.pin = pinNumber;
