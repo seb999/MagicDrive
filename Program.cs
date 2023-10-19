@@ -16,27 +16,22 @@ class Program
     private static string bashPictureR = @"/home/sebastien/Git/MagicDrive/Script/takePicR.sh";
     private static string bashPictureC = @"/home/sebastien/Git/MagicDrive/Script/takePicC.sh";
     private static string bashPictureVideo = @"/home/sebastien/Git/MagicDrive/Script/takeVideo.sh";
-
-
-    private static bool isAutoDrive = false;
-    private static LedController ledStandBy;
-    private static LedController ledDriving;
+    private static MyEnum.Mode mode = MyEnum.Mode.standby;
+    private static bool isOledOff = false;
     private static StepperMotorController motor;
+    private static SSD1306Controller oled;
     private static int offset = 0;
     private static bool booting = true;
-    private static SSD1306Controller oled;
-
+    private static List<double> AIscores = new List<double>();
+    private static int AImaxScores = 5; // Maximum number of scores to display
 
     static void Main(string[] args)
     {
-        //leds
-        ledStandBy = new LedController(2);
-        ledDriving = new LedController(3);
         motor = new StepperMotorController();
 
         //keys
         var key1 = new SwitchController(21, OnBtnKey1Changed);
-        var key2 = new SwitchController(20, OnBtnKey1Changed);
+        var key2 = new SwitchController(20, OnBtnKey2Changed);
         var key3 = new SwitchController(16, OnBtnKey3Changed);
 
         //Joystick
@@ -48,22 +43,37 @@ class Program
         var up = new SwitchController(19, OnBtnDownChanged);
 
         // Create an SPI device
-        var spiConnectionSettings = new SpiConnectionSettings(0, 0)
-        {
-            ClockFrequency = 1000000,
-            Mode = 0b00
-        };
+        var spiConnectionSettings = new SpiConnectionSettings(0, 0) { ClockFrequency = 1000000, Mode = 0b00 };
         var spiDevice = SpiDevice.Create(spiConnectionSettings);
         oled = new SSD1306Controller(spiDevice, 25, 24);
 
         oled.FlipScreen();
-        oled.DrawRect(92, 52, 40,40,1);
-        oled.DrawText(100, 55, "X", 1);
-        oled.DrawText(110, 55, offset.ToString(), 1);
+
+        //Drive Button
+        oled.DrawLineH(106, 0, 40, 1);
+        oled.DrawLineV(106, 0, 5, 1);
+        oled.DrawText(110, 3, "DR", 1);
+
+        //NA Button
+        oled.DrawLineH(106, 25, 40, 1);
+        oled.DrawLineV(106, 25, 5, 1);
+        oled.DrawText(110, 28, "OL", 1);
+
+        //TRAIN Button
+        oled.DrawLineH(106, 51, 40, 1);
+        oled.DrawLineV(106, 51, 5, 1);
+        oled.DrawText(110, 55, "TR", 1);
+
+        //Motor Offset
+        oled.DrawText(0, 30, "-", 1);
+        oled.DrawText(0, 20, offset.ToString(), 1);
+        oled.DrawText(0, 10, "+", 1);
+
+        //switch screen on and display
         oled.Display();
 
         booting = false;
-        
+
         ConnectToCamera();
 
         Standby();
@@ -73,50 +83,33 @@ class Program
     {
         while (true)
         {
-            if (isAutoDrive)
+            switch (mode)
             {
-                oled.FillRect(0, 0, 67, 12, 0);
-                oled.Display();
-                oled.FillRect(87, 0, 42, 12, 1);
-                oled.DrawText(90, 2, "AUTO", 0);
-                oled.Display();
+                case MyEnum.Mode.standby:
+                    oled.FillRect(38, 0, 50, 12, 0);
+                    oled.FillRect(20, 0, 68, 12, 1);
+                    oled.DrawText(23, 2, "STANDBY", 0);
+                    oled.Display();
+                    Thread.Sleep(800);
+                    oled.FillRect(20, 0, 68, 12, 0);
+                    oled.Display();
+                    Thread.Sleep(500);
+                    break;
+
+                case MyEnum.Mode.drive:
+                    oled.FillRect(20, 0, 68, 12, 0);
+                    oled.FillRect(35, 0, 50, 12, 1);
+                    oled.DrawText(38, 2, "DRIVE", 0);
+                    oled.Display();
+                    break;
+
+                case MyEnum.Mode.train:
+                    oled.FillRect(20, 0, 68, 12, 0);
+                    oled.FillRect(25, 0, 50, 12, 1);
+                    oled.DrawText(28, 2, "TRAIN", 0);
+                    oled.Display();
+                    break;
             }
-            else
-            {
-                oled.FillRect(0, 0, 67, 12, 1);
-                oled.FillRect(87, 0, 42, 12, 0);
-                oled.DrawText(2, 2, "STANDBY", 0);
-                oled.Display();
-                Thread.Sleep(800);
-                oled.FillRect(0, 0, 67, 12, 0);
-                oled.Display();
-                Thread.Sleep(500);
-            }
-        }
-    }
-
-    private static void MotorOffset(MyEnum.offset dir)
-    {
-        switch (dir)
-        {
-            case MyEnum.offset.up:
-                 oled.DrawText(110, 55, offset.ToString(), 0);
-                oled.Display();
-                offset += 1;
-                 oled.DrawText(110, 55, offset.ToString(), 1);
-                oled.Display();
-                break;
-
-            case MyEnum.offset.down:
-                oled.DrawText(110, 55, offset.ToString(), 0);
-                oled.Display();
-                offset -= 1;
-                oled.DrawText(110, 55, offset.ToString(), 1);
-                oled.Display();
-                break;
-
-            default:
-                break;
         }
     }
 
@@ -129,9 +122,11 @@ class Program
             {
                 string result = response.GetValue<string>();
                 Console.WriteLine(result);
-                if (isAutoDrive)
+                if (mode == MyEnum.Mode.drive)
                 {
                     PredictionResult predictionResult = JsonSerializer.Deserialize<PredictionResult>(result);
+
+                    AddScore(Math.Round(predictionResult.score, 2));
 
                     AdjustDirection(predictionResult.label, predictionResult.score);
                 }
@@ -145,21 +140,40 @@ class Program
         }
     }
 
+    #region Joystick / switch
+
     static void OnBtnKey1Changed(object sender, PinValueChangedEventArgs e)
     {
         if (e.ChangeType == PinEventTypes.Falling)
         {
-            if (!isAutoDrive)
+            if (mode == MyEnum.Mode.standby || mode == MyEnum.Mode.train)
             {
-                isAutoDrive = true;
-                ledDriving.Blink();
+                mode = MyEnum.Mode.drive;
             }
             else
             {
-                isAutoDrive = false;
+                mode = MyEnum.Mode.standby;
             }
-
             Thread.Sleep(50);
+        }
+    }
+
+    static void OnBtnKey2Changed(object sender, PinValueChangedEventArgs e)
+    {
+        if (e.ChangeType == PinEventTypes.Falling)
+        {
+            if (!isOledOff)
+            {
+                isOledOff = true;
+                oled.Off();
+                return;
+            }
+            else
+            {
+                isOledOff = false;
+                oled.On();
+                return;
+            }
         }
     }
 
@@ -167,11 +181,17 @@ class Program
     {
         if (e.ChangeType == PinEventTypes.Falling)
         {
-            TakePicture(bashPictureVideo);
-            ledDriving.Blink();
-            Thread.Sleep(50);
+            if (mode != MyEnum.Mode.train)
+            {
+                mode = MyEnum.Mode.train;
+                return;
+            }
+            else
+            {
+                mode = MyEnum.Mode.standby;
+                return;
+            }
         }
-
     }
 
     static void OnBtnUpChanged(object sender, PinValueChangedEventArgs e)
@@ -179,19 +199,38 @@ class Program
         if (e.ChangeType == PinEventTypes.Falling)
         {
             if (booting) return;
-            MotorOffset(MyEnum.offset.up);
-            //motor.TurnLeft(600 + offsetx10);
+            if (mode != MyEnum.Mode.train)
+            {
+                oled.FillRect(1, 45, 32, 32, 0);
+                oled.DrawIcon(1, 45, 32, 32, Icon.right32x32);
+                MotorOffset(MyEnum.Offset.up);
+                return;
+            }
+            else
+            {
+                TakePicture(bashPictureVideo);
+                Thread.Sleep(50);
+                return;
+            }
         }
     }
 
     static void OnBtnDownChanged(object sender, PinValueChangedEventArgs e)
     {
-
         if (e.ChangeType == PinEventTypes.Falling)
         {
             if (booting) return;
-            MotorOffset(MyEnum.offset.down);
-            //motor.TurnRight(600 + offsetx10);
+            if (mode != MyEnum.Mode.train)
+            {
+            }
+            else
+            {
+                TakePicture(bashPictureVideo);
+                Thread.Sleep(50);
+                return;
+            }
+            oled.FillRect(1, 45, 32, 32, 0);
+            oled.DrawIcon(1, 45, 32, 32, Icon.left32x32);
         }
     }
 
@@ -200,21 +239,18 @@ class Program
         if (e.ChangeType == PinEventTypes.Falling)
         {
             if (booting) return;
-            oled.On();
-            // TakePicture(bashPictureR);
-            // ledDriving.Blink();
-            // Thread.Sleep(50);lll
-        }
-    }
-
-    static void OnBtnCenterChanged(object sender, PinValueChangedEventArgs e)
-    {
-        if (e.ChangeType == PinEventTypes.Falling)
-        {
-            if (booting) return;
-            TakePicture(bashPictureC);
-            ledDriving.Blink();
-            Thread.Sleep(50);
+            if (mode == MyEnum.Mode.train)
+            {
+                oled.FillRect(30, 30, 35, 35, 0);
+                oled.DrawIcon(30, 30, 32, 32, Icon.camera32x32);
+                TakePicture(bashPictureR);
+                Thread.Sleep(50);
+                oled.FillRect(30, 30, 35, 35, 0);
+            }
+            else
+            {
+                motor.TurnRight(600 + offset * 10);
+            }
         }
     }
 
@@ -223,14 +259,40 @@ class Program
         if (e.ChangeType == PinEventTypes.Falling)
         {
             if (booting) return;
-            // TakePicture(bashPictureL);
-            // ledDriving.Blink();
-            // Thread.Sleep(50);
-            oled.Off();
+            if (mode == MyEnum.Mode.train)
+            {
+                oled.FillRect(30, 30, 35, 35, 0);
+                oled.DrawIcon(30, 30, 32, 32, Icon.camera32x32);
+                TakePicture(bashPictureL);
+                Thread.Sleep(50);
+                oled.FillRect(30, 30, 35, 35, 0);
+            }
+            else
+            {
+                motor.TurnLeft(600 + offset * 10);
+            }
         }
     }
 
-    #region Camera and AI processing
+    static void OnBtnCenterChanged(object sender, PinValueChangedEventArgs e)
+    {
+        if (e.ChangeType == PinEventTypes.Falling)
+        {
+            if (booting) return;
+            if (mode == MyEnum.Mode.train)
+            {
+                oled.FillRect(30, 30, 35, 35, 0);
+                oled.DrawIcon(30, 30, 32, 32, Icon.camera32x32);
+                TakePicture(bashPictureC);
+                Thread.Sleep(50);
+                oled.FillRect(30, 30, 35, 35, 0);
+            }
+        }
+    }
+
+    #endregion
+
+    #region Helper
 
     static void TakePicture(string bashPath)
     {
@@ -247,59 +309,66 @@ class Program
         switch (label)
         {
             case "left":
+                oled.FillRect(1, 45, 32, 32, 0);
+                oled.DrawIcon(1, 45, 32, 32, Icon.right32x32);
                 //motor.TurnRight(600);
                 break;
 
             case "right":
+                oled.FillRect(1, 45, 32, 32, 0);
+                oled.DrawIcon(1, 45, 32, 32, Icon.left32x32);
                 //motor.TurnLeft(600);
                 break;
 
             case "center":
+                oled.FillRect(1, 45, 32, 32, 0);
+                oled.DrawIcon(1, 45, 32, 32, Icon.center32x32);
                 break;
         }
     }
 
-    static string? GetMostRecentImagePath(string folderPath)
+    private static void MotorOffset(MyEnum.Offset dir)
     {
-        // Get all image files in the folder
-        string[] imageExtensions = { "*.jpg" };
-        var imageFiles = imageExtensions.SelectMany(ext => Directory.GetFiles(folderPath, ext));
-
-        if (imageFiles.Any())
+        switch (dir)
         {
-            // Get the most recent image file based on creation time
-            string? mostRecentImagePath = imageFiles
-                .Select(filePath => new FileInfo(filePath))
-                .OrderByDescending(fileInfo => fileInfo.CreationTime)
-                .FirstOrDefault()?.FullName;
+            case MyEnum.Offset.up:
+                oled.DrawText(0, 20, offset.ToString(), 0);
+                offset += 1;
+                oled.DrawText(0, 20, offset.ToString(), 1);
+                break;
 
-            return mostRecentImagePath;
-        }
-        else
-        {
-            Console.WriteLine("No image files found in the folder.");
-            return null;
+            case MyEnum.Offset.down:
+                oled.DrawText(0, 20, offset.ToString(), 0);
+                offset -= 1;
+                oled.DrawText(0, 20, offset.ToString(), 1);
+                break;
+
+            default:
+                break;
         }
     }
 
-    static void DeleteImage(string imagePath)
+    public static void AddScore(double newScore)
     {
-        try
+        AIscores.Insert(0, newScore); // Add the new score at the beginning of the list
+
+        if (AIscores.Count > AImaxScores)
         {
-            if (File.Exists(imagePath))
-            {
-                File.Delete(imagePath);
-            }
-            else
-            {
-                Console.WriteLine("Image not found.");
-            }
+            AIscores.RemoveAt(AImaxScores); // Remove the last score if there are more than maxScores
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An error occurred: {ex.Message}");
-        }
+
+        DisplayScores();
     }
 
+    private static void DisplayScores()
+    {
+        oled.FillRect(42, 14, 30, 50, 0);
+        for (int i = 0; i < AIscores.Count; i++)
+        {
+
+            oled.DrawText(45, 15 + (10 * i), AIscores[i].ToString(), 1);
+        }
+    }
+    
     #endregion
 }

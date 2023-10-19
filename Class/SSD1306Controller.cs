@@ -50,33 +50,19 @@ public class SSD1306Controller
 
     #endregion
 
-    public void DrawText(int x, int y, string text, int color)
+    public void On()
     {
-        foreach (char character in text)
-        {
-            if (character < 32 || character > 126)
-            {
-                // Skip characters that are not in the font
-                continue;
-            }
+        SendCommand(0xAF); // Display On
+    }
 
-            byte[] charData = Font.Font8x12[character - 32]; // Adjust for the ASCII offset
+    public void Off()
+    {
+        SendCommand(0xAE); // Display Off
+    }
 
-            for (int i = 0; i < 8; i++)
-            {
-                byte line = charData[i];
-                for (int j = 0; j < 8; j++)
-                {
-                    if ((line & (1 << j)) != 0)
-                    {
-                        SetPixel(x + j, y + i, color);
-                    }
-                }
-            }
-
-            // Move to the next character position
-            x += 9; // 5 columns + 1 column spacing
-        }
+    public void Clear()
+    {
+        Array.Clear(_buffer, 0, _buffer.Length);
     }
 
     public void Display()
@@ -106,15 +92,16 @@ public class SSD1306Controller
             }
         }
     }
+   
+    #region Base
 
-    public void FlipScreen() {
+    public void FlipScreen()
+    {
         SendCommand(0xA0);              //SEGREMAP   //Rotate screen 180 deg
         SendCommand(0xDA);
         SendCommand(0x22);
         SendCommand(0xC0);            //COMSCANDEC  Rotate screen 180 Deg
-        }
-
-    #region Base
+    }
 
     private void SendCommand(byte command)
     {
@@ -140,30 +127,44 @@ public class SSD1306Controller
         }
     }
 
-    public void On()
-    {
-        SendCommand(0xAF); // Display On
-    }
-
-    public void Off()
-    {
-        SendCommand(0xAE); // Display Off
-    }
-
     public void SetContrast(byte contrast)
     {
         SendCommand(0x81);
         SendCommand(contrast);
     }
 
-    public void Clear()
-    {
-        Array.Clear(_buffer, 0, _buffer.Length);
-    }
-
     #endregion
 
     #region Drawing
+
+    public void DrawText(int x, int y, string text, int color)
+    {
+        foreach (char character in text)
+        {
+            if (character < 32 || character > 126)
+            {
+                // Skip characters that are not in the font
+                continue;
+            }
+
+            byte[] charData = Font.Font8x12[character - 32]; // Adjust for the ASCII offset
+
+            for (int i = 0; i < 8; i++)
+            {
+                byte line = charData[i];
+                for (int j = 0; j < 8; j++)
+                {
+                    if ((line & (1 << j)) != 0)
+                    {
+                        SetPixel(x + j, y + i, color);
+                    }
+                }
+            }
+
+            // Move to the next character position
+            x += 9; // 5 columns + 1 column spacing
+        }
+    }
 
     public void DrawRect(int x, int y, int width, int height, int color)
     {
@@ -179,6 +180,22 @@ public class SSD1306Controller
         }
     }
 
+    public void DrawLineH(int x, int y, int length, int color)
+    {
+        for (int i = x; i < x + length; i++)
+        {
+            SetPixel(i, y, color);
+        }
+    }
+
+    public void DrawLineV(int x, int y, int length, int color)
+    {
+        for (int i = y; i < y + length; i++)
+        {
+            SetPixel(x, i, color);
+        }
+    }
+
     public void FillRect(int x, int y, int width, int height, int color)
     {
         for (int i = x; i < x + width; i++)
@@ -186,6 +203,24 @@ public class SSD1306Controller
             for (int j = y; j < y + height; j++)
             {
                 SetPixel(i, j, color);
+            }
+        }
+    }
+
+    public void DrawIcon(int x, int y, int width, int height, byte[] icon)
+    {
+        for (int i = 0; i < width * height / 8; i++)
+        {
+            byte charColumn = (byte)(icon[i]);
+            for (int j = 0; j < 8; j++)
+            {
+                int targetX = i % width + x;
+                int targetY = (i / width) * 8 + j + y;
+                if ((charColumn & (1 << j)) == 0)
+                {
+                    // Assuming you have a SetPixel method to set individual pixels
+                    SetPixel(targetX, targetY, 1);
+                }
             }
         }
     }

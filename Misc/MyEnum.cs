@@ -14,9 +14,15 @@ namespace MagicDrive.Misc
             Right
         }
 
-        public enum offset{
+        public enum Offset{
             up,
             down
+        }
+
+         public enum Mode{
+            standby,
+            drive,
+            train
         }
     }
 }
