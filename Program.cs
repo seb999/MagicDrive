@@ -9,6 +9,22 @@ using System.Linq;
 using MarginCoin.Misc;
 using SocketIOClient;
 using System.Text.Json;
+//https://mischianti.org/images-to-byte-array-online-converter-cpp-arduino/  Ti convert image to byte array
+
+//COMMANDS
+//sudo sh Script/killBill.sh              ---kill MagicDrive processes
+//sudo nano /etc/rc.local                 ---Edit boot file
+//sudo reboot                             ---Reboot Raspberry
+//dotnet publish --configuration Release  ---Publish
+
+//SYSTEMD
+//journalctl -u magicDriveStreaming.service
+//sudo nano /lib/systemd/system/magicDriveStreaming.service
+// sudo systemctl enable magicDriveStreaming.service 
+//sudo systemctl daemon-reload
+//sudo systemctl start magicDriveStreamingStreaming.service
+//sudo systemctl stop magicDriveStreamingStreaming.service
+// sudo systemctl disable magicDriveStreaming.service 
 
 class Program
 {
@@ -21,12 +37,18 @@ class Program
     private static StepperMotorController motor;
     private static SSD1306Controller oled;
     private static int offset = 0;
-    private static bool booting = true;
+    private static bool booting = true; 
     private static List<double> AIscores = new List<double>();
     private static int AImaxScores = 5; // Maximum number of scores to display
 
     static void Main(string[] args)
     {
+        AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
+        {
+            // Your cleanup code here
+            Console.WriteLine("Application is exiting...");
+        };
+        
         motor = new StepperMotorController();
 
         //keys
@@ -78,6 +100,7 @@ class Program
 
         Standby();
     }
+    
 
     private static void Standby()
     {
@@ -121,12 +144,11 @@ class Program
             client.On("message", response =>
             {
                 string result = response.GetValue<string>();
-                Console.WriteLine(result);
                 if (mode == MyEnum.Mode.drive)
                 {
                     PredictionResult predictionResult = JsonSerializer.Deserialize<PredictionResult>(result);
 
-                    AddScore(Math.Round(predictionResult.score, 2));
+                    AddScore(Math.Round(predictionResult.score*100, 3));
 
                     AdjustDirection(predictionResult.label, predictionResult.score);
                 }
@@ -136,7 +158,6 @@ class Program
         catch (Exception ex)
         {
             Console.WriteLine("Error connecting to the Socket.IO server: " + ex.Message);
-            // You can take further action here, such as logging or handling the error.
         }
     }
 
@@ -152,6 +173,7 @@ class Program
             }
             else
             {
+                oled.FillRect(34, 14, 60, 70, 0);
                 mode = MyEnum.Mode.standby;
             }
             Thread.Sleep(50);
@@ -201,15 +223,16 @@ class Program
             if (booting) return;
             if (mode != MyEnum.Mode.train)
             {
-                oled.FillRect(1, 45, 32, 32, 0);
-                oled.DrawIcon(1, 45, 32, 32, Icon.right32x32);
                 MotorOffset(MyEnum.Offset.up);
                 return;
             }
             else
             {
+                oled.FillRect(30, 30, 35, 35, 0);
+                oled.DrawIcon(30, 30, 32, 32, Icon.camera32x32);
                 TakePicture(bashPictureVideo);
                 Thread.Sleep(50);
+                oled.FillRect(30, 30, 35, 35, 0);
                 return;
             }
         }
@@ -222,15 +245,18 @@ class Program
             if (booting) return;
             if (mode != MyEnum.Mode.train)
             {
+                MotorOffset(MyEnum.Offset.down);
+                return;
             }
             else
             {
+                oled.FillRect(30, 30, 35, 35, 0);
+                oled.DrawIcon(30, 30, 32, 32, Icon.camera32x32);
                 TakePicture(bashPictureVideo);
                 Thread.Sleep(50);
+                oled.FillRect(30, 30, 35, 35, 0);
                 return;
             }
-            oled.FillRect(1, 45, 32, 32, 0);
-            oled.DrawIcon(1, 45, 32, 32, Icon.left32x32);
         }
     }
 
@@ -249,7 +275,7 @@ class Program
             }
             else
             {
-                motor.TurnRight(600 + offset * 10);
+                motor.TurnRight(200 + offset * 10);
             }
         }
     }
@@ -269,7 +295,7 @@ class Program
             }
             else
             {
-                motor.TurnLeft(600 + offset * 10);
+                motor.TurnLeft(200 + offset * 10);
             }
         }
     }
@@ -311,13 +337,13 @@ class Program
             case "left":
                 oled.FillRect(1, 45, 32, 32, 0);
                 oled.DrawIcon(1, 45, 32, 32, Icon.right32x32);
-                //motor.TurnRight(600);
+                motor.TurnRight(50 + offset * 10);
                 break;
 
             case "right":
                 oled.FillRect(1, 45, 32, 32, 0);
                 oled.DrawIcon(1, 45, 32, 32, Icon.left32x32);
-                //motor.TurnLeft(600);
+                 motor.TurnLeft(50 + offset * 10);
                 break;
 
             case "center":
@@ -362,11 +388,10 @@ class Program
 
     private static void DisplayScores()
     {
-        oled.FillRect(42, 14, 30, 50, 0);
+        oled.FillRect(34, 14, 60, 75, 0);
         for (int i = 0; i < AIscores.Count; i++)
         {
-
-            oled.DrawText(45, 15 + (10 * i), AIscores[i].ToString(), 1);
+            oled.DrawText(34, 15 + (10 * i), AIscores[i].ToString(), 1);
         }
     }
     

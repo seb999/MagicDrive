@@ -5,9 +5,9 @@ public class StepperMotorController
 {
     private readonly GpioController controller;
     // Define the A4988 driver pins
-    int ENABLE = 17; // Enable pin
-    int DIR = 27;  // Direction pin
-    int STEP = 22; // Step pin
+    int ENABLE = 27; // Enable pin
+    int STEP = 17; // Step pin
+    int DIR = 4;  // Direction pin
    
     
     // Delay in milliseconds between steps (controls motor speed)

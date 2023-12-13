@@ -1,0 +1,19 @@
+
+Exiting script
+Running socket-io-server.sh
+Starting Socket-io server...
+(3676) wsgi starting up on http://127.0.0.1:5000
+(3676) accepted ('127.0.0.1', 43668)
+wsgi exiting
+127.0.0.1 - - [12/Dec/2023 21:13:22] "GET /socket.io/?EIO=4&transport=websocket HTTP/1.1" 200 0 46.164274
+(3676) wsgi exited, is_accepting=True
+Client connected: w9ZcfbzJgE-yjvCSAAAB
+Client disconnected: w9ZcfbzJgE-yjvCSAAAB
+Running startMagicDrive.sh
+Starting MagicDrive .NET Core application...
+Running camera-streaming.sh
+Running socket-io-server.sh
+Running startMagicDrive.sh
+Running camera-streaming.sh
+Running socket-io-server.sh
+Running startMagicDrive.sh

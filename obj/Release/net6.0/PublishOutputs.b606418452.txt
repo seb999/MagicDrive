@@ -15,12 +15,14 @@
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/Microsoft.ML.DataView.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/Microsoft.ML.TensorFlow.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/Microsoft.ML.Vision.dll
+/home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/Microsoft.Win32.SystemEvents.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/Newtonsoft.Json.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/NumSharp.Lite.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/Protobuf.Text.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/SocketIOClient.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/System.CodeDom.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/System.Device.Gpio.dll
+/home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/System.Drawing.Common.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/System.Reactive.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/System.Text.Json.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/TensorFlow.NET.dll
@@ -31,3 +33,5 @@
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/runtimes/osx-x64/native/libLdaNative.dylib
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/runtimes/win-x64/native/LdaNative.dll
 /home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/runtimes/win-x86/native/LdaNative.dll
+/home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/runtimes/win/lib/net6.0/Microsoft.Win32.SystemEvents.dll
+/home/sebastien/Git/MagicDrive/bin/Release/net6.0/publish/runtimes/win/lib/net6.0/System.Drawing.Common.dll

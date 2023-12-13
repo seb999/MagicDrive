@@ -46,14 +46,6 @@
               "target": "Package",
               "version": "[1.7.1, )"
             },
-            "SixLabors.ImageSharp": {
-              "target": "Package",
-              "version": "[3.0.2, )"
-            },
-            "SkiaSharp": {
-              "target": "Package",
-              "version": "[2.88.6, )"
-            },
             "SocketIOClient": {
               "target": "Package",
               "version": "[3.0.6, )"

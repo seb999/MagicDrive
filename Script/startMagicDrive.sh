@@ -11,4 +11,5 @@ fi
 
 # Start the .NET Core application
 echo "Starting MagicDrive .NET Core application..."
-$HOME/.dotnet/dotnet "$app_path"
+#$HOME/.dotnet/dotnet "$app_path"
+/home/sebastien/.dotnet/dotnet "$app_path"

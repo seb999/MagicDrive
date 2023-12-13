@@ -1,9 +1,6 @@
 using System.Device.Gpio;
 using System.Device.Spi;
-using SkiaSharp;
 using MagicDrive.Misc;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
 //https://github.com/rene-mt/esp8266-oled-sh1106/blob/master/SH1106.cpp
 
 public class SSD1306Controller
