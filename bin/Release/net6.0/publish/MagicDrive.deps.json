@@ -11,7 +11,7 @@
           "Microsoft.ML": "2.0.1",
           "Microsoft.ML.Vision": "1.7.1",
           "SocketIOClient": "3.0.6",
-          "System.Device.Gpio": "2.2.0",
+          "System.Device.Gpio": "3.1.0",
           "System.Drawing.Common": "7.0.0"
         },
         "runtime": {
@@ -228,11 +228,11 @@
         }
       },
       "System.Collections.Immutable/1.5.0": {},
-      "System.Device.Gpio/2.2.0": {
+      "System.Device.Gpio/3.1.0": {
         "runtime": {
           "lib/net6.0/System.Device.Gpio.dll": {
-            "assemblyVersion": "2.2.0.0",
-            "fileVersion": "2.200.22.47910"
+            "assemblyVersion": "3.1.0.0",
+            "fileVersion": "3.100.23.56604"
           }
         }
       },
@@ -493,12 +493,12 @@
       "path": "system.collections.immutable/1.5.0",
       "hashPath": "system.collections.immutable.1.5.0.nupkg.sha512"
     },
-    "System.Device.Gpio/2.2.0": {
+    "System.Device.Gpio/3.1.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ShuBDkL/QlQvaeUXcTvtY8xnb0U/ueisVw3VcIgybmrHAl4BiQ/oZEi8yQFzb/xlzDc12AZ/J1oUE9AawV7Yag==",
-      "path": "system.device.gpio/2.2.0",
-      "hashPath": "system.device.gpio.2.2.0.nupkg.sha512"
+      "sha512": "sha512-4Jw7+lTwdU63zsaD9a6H47YC/LK6lGhi3SKBGdf1jV0ySj22NJkglQ35dBZWbtwiXOzbBn3Gl8XzIcpv1pai3Q==",
+      "path": "system.device.gpio/3.1.0",
+      "hashPath": "system.device.gpio.3.1.0.nupkg.sha512"
     },
     "System.Drawing.Common/7.0.0": {
       "type": "package",

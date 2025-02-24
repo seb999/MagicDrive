@@ -52,7 +52,7 @@
             },
             "System.Device.Gpio": {
               "target": "Package",
-              "version": "[2.2.0-*, )"
+              "version": "[3.1.0, )"
             },
             "System.Drawing.Common": {
               "target": "Package",
@@ -75,7 +75,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/sebastien/.dotnet/sdk/6.0.413/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/opt/dotnet/sdk/6.0.421/RuntimeIdentifierGraph.json"
         }
       }
     }

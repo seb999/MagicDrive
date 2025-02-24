@@ -37,9 +37,14 @@ class Program
     private static StepperMotorController motor;
     private static SSD1306Controller oled;
     private static int offset = 0;
-    private static bool booting = true; 
+    private static bool booting = true;
     private static List<double> AIscores = new List<double>();
     private static int AImaxScores = 5; // Maximum number of scores to display
+
+    // Define a static variable to store the time of the last valid press.
+    private static DateTime _lastPressTime = DateTime.MinValue;
+    // Define a debounce interval (e.g., 200 milliseconds).
+    private static readonly TimeSpan _debounceInterval = TimeSpan.FromMilliseconds(1000);
 
     static void Main(string[] args)
     {
@@ -48,7 +53,7 @@ class Program
             // Your cleanup code here
             Console.WriteLine("Application is exiting...");
         };
-        
+
         motor = new StepperMotorController();
 
         //keys
@@ -100,7 +105,7 @@ class Program
 
         Standby();
     }
-    
+
 
     private static void Standby()
     {
@@ -148,7 +153,7 @@ class Program
                 {
                     PredictionResult predictionResult = JsonSerializer.Deserialize<PredictionResult>(result);
 
-                    AddScore(Math.Round(predictionResult.score*100, 3));
+                    AddScore(Math.Round(predictionResult.score * 100, 3));
 
                     AdjustDirection(predictionResult.label, predictionResult.score);
                 }
@@ -167,6 +172,15 @@ class Program
     {
         if (e.ChangeType == PinEventTypes.Falling)
         {
+            DateTime now = DateTime.Now;
+            if (now - _lastPressTime < _debounceInterval)
+            {
+                // If it is, ignore this press.
+                return;
+            }
+
+            // Update the last press time.
+            _lastPressTime = now;
             if (mode == MyEnum.Mode.standby || mode == MyEnum.Mode.train)
             {
                 mode = MyEnum.Mode.drive;
@@ -343,7 +357,7 @@ class Program
             case "right":
                 oled.FillRect(1, 45, 32, 32, 0);
                 oled.DrawIcon(1, 45, 32, 32, Icon.left32x32);
-                 motor.TurnLeft(50 + offset * 10);
+                motor.TurnLeft(50 + offset * 10);
                 break;
 
             case "center":
@@ -394,6 +408,6 @@ class Program
             oled.DrawText(34, 15 + (10 * i), AIscores[i].ToString(), 1);
         }
     }
-    
+
     #endregion
 }

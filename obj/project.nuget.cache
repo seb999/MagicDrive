@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "FkhEfacON3XfpZYVEvvYeRtCdLHwjO2PoJ/MNVjb5FDEJ+qm925faRYOQ0ruzYyf8MBWcjbAknWrah8yPlu8Pg==",
+  "dgSpecHash": "0ATL+ap7bPqjgPaU8TfIP6rgJbokDPRUO6J9/6eg2gTOBHuCcpd9VrdsotY+BtsKI7ndh8h5glpK8abOwYCfyQ==",
   "success": true,
   "projectFilePath": "/home/sebastien/Git/MagicDrive/MagicDrive.csproj",
   "expectedPackageFiles": [
@@ -20,7 +20,7 @@
     "/home/sebastien/.nuget/packages/system.codedom/4.5.0/system.codedom.4.5.0.nupkg.sha512",
     "/home/sebastien/.nuget/packages/system.collections/4.3.0/system.collections.4.3.0.nupkg.sha512",
     "/home/sebastien/.nuget/packages/system.collections.immutable/1.5.0/system.collections.immutable.1.5.0.nupkg.sha512",
-    "/home/sebastien/.nuget/packages/system.device.gpio/2.2.0/system.device.gpio.2.2.0.nupkg.sha512",
+    "/home/sebastien/.nuget/packages/system.device.gpio/3.1.0/system.device.gpio.3.1.0.nupkg.sha512",
     "/home/sebastien/.nuget/packages/system.drawing.common/7.0.0/system.drawing.common.7.0.0.nupkg.sha512",
     "/home/sebastien/.nuget/packages/system.io/4.3.0/system.io.4.3.0.nupkg.sha512",
     "/home/sebastien/.nuget/packages/system.io.filesystem.accesscontrol/4.5.0/system.io.filesystem.accesscontrol.4.5.0.nupkg.sha512",

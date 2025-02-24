@@ -12,7 +12,7 @@ else
     echo "No process matching command '$app_command' found."
 fi
 
-app_command="_magicDriveSocketIoServer.py"
+app_command="_magicDriveServer.py"
 
 # Check if the application is running
 if pgrep -f "$app_command" > /dev/null
